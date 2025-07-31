@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: Employee-Tracking-System
+
   datasource:
     url: jdbc:postgresql://ep-snowy-bread-aevqesh4-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require
     username: neondb_owner
@@ -23,3 +24,8 @@ spring:
 
   main:
     allow-circular-references: true
+
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: lazy

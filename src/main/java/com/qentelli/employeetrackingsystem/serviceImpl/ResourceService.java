@@ -19,18 +19,19 @@ import com.qentelli.employeetrackingsystem.models.client.response.ResourceRespon
 import com.qentelli.employeetrackingsystem.repository.ProjectRepository;
 import com.qentelli.employeetrackingsystem.repository.ResourceRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class ResourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceService.class);
-    
-    @Lazy
+
     private final ResourceRepository repository;
     private final ProjectRepository projectRepository;
+
+    public ResourceService(@Lazy ResourceRepository repository, ProjectRepository projectRepository) {
+        this.repository = repository;
+        this.projectRepository = projectRepository;
+    }
 
     // 🟢 Create
     public ResourceResponse createResource(ResourceRequest dto) {
@@ -56,14 +57,16 @@ public class ResourceService {
     // 📦 Get All
     public List<ResourceResponse> getAllResources() {
         logger.info("Fetching all Resource entries");
-        return repository.findAll().stream().map(this::mapToResponseDto).toList();
+        return repository.findAll()
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
     }
 
     // 📄 Paginated Read
     public Page<ResourceResponse> getAllResourcesPaginated(Pageable pageable) {
         logger.info("Fetching resources with pageable: {}", pageable);
-        Page<Resource> resourcePage = repository.findAll(pageable);
-        return resourcePage.map(this::mapToResponseDto);
+        return repository.findAll(pageable).map(this::mapToResponseDto);
     }
 
     // 🔍 Get by ID
@@ -76,18 +79,19 @@ public class ResourceService {
     // 🔍 Get by ResourceType
     public List<ResourceResponse> getResourcesByType(ResourceType type) {
         logger.info("Fetching resources filtered by type: {}", type);
-        List<Resource> resources = repository.findByResourceType(type);
-        return resources.stream().map(this::mapToResponseDto).toList();
+        return repository.findByResourceType(type)
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
     }
 
     // 🔍 Get by ResourceType and Name
     public List<ResourceResponse> getResourcesByTypeAndName(ResourceType type, String name) {
         logger.info("Searching resources by type: {} and name: {}", type, name);
 
-        String processedName = name;
-        if (type == ResourceType.TECH_STACK && name != null) {
-            processedName = name.trim().toUpperCase();
-        }
+        String processedName = type == ResourceType.TECH_STACK && name != null
+                ? name.trim().toUpperCase()
+                : name;
 
         List<Resource> resources = repository.findByResourceTypeAndName(type, processedName);
 
@@ -96,7 +100,9 @@ public class ResourceService {
             throw new ResourceNotFoundException("No resources found for type '" + type + "' and name '" + name + "'");
         }
 
-        return resources.stream().map(this::mapToResponseDto).toList();
+        return resources.stream()
+                .map(this::mapToResponseDto)
+                .toList();
     }
 
     // 🔄 Update
@@ -134,9 +140,7 @@ public class ResourceService {
     // 🧮 Ratio Calculation
     private String calculateRatio(int onsite, int offsite) {
         int total = onsite + offsite;
-        if (total == 0) {
-            return "0% : 0%";
-        }
+        if (total == 0) return "0% : 0%";
         int onsiteRatio = (int) Math.round((onsite * 100.0) / total);
         int offsiteRatio = 100 - onsiteRatio;
         return onsiteRatio + "% : " + offsiteRatio + "%";
@@ -144,12 +148,13 @@ public class ResourceService {
 
     // 🔄 DTO Mapper
     private ResourceResponse mapToResponseDto(Resource entity) {
+        Project project = entity.getProject();
         return new ResourceResponse(
                 entity.getResourceId(),
                 entity.getResourceType(),
                 entity.getTechStack(),
-                entity.getProject().getProjectId(),
-                entity.getProject().getProjectName(),
+                project != null ? project.getProjectId() : null,
+                project != null ? project.getProjectName() : "N/A",
                 entity.getOnsite(),
                 entity.getOffsite(),
                 entity.getTotal(),

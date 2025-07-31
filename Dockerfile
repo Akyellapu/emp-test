@@ -25,7 +25,7 @@ EXPOSE 8080
 # Use dynamic port on Render
 ENV PORT=8080
 
-ENV JAVA_OPTS="-Xms512m -Xmx2048m"
+ENV JAVA_OPTS="-Xms512m -Xmx2048m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
  
-# Run the app
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Health check to ensure the application is running
