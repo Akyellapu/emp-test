@@ -1,0 +1,25 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: Employee-Tracking-System
+  datasource:
+    url: jdbc:postgresql://ep-snowy-bread-aevqesh4-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_6K7OBMIlbywA
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Kolkata
+    show-sql: true
+
+  jackson:
+    time-zone: Asia/Kolkata
+
+  main:
+    allow-circular-references: true
